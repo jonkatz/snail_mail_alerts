@@ -1,5 +1,5 @@
 from typing import Optional
-from twilio import Client
+from twilio.rest import Client
 from analyze_mail import MailAnalysis
 from config import Config
 
