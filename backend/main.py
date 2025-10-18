@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from messaging import send_simple_message
 from config import Config
+from mail_processor import process_multiple_mails
 
 app = FastAPI(
     title="SMS Messaging API", description="Simple SMS messaging using SlickText API"
@@ -52,3 +53,13 @@ def health_check():
             "recipient_configured": Config.validate_recipient_config(),
         },
     }
+
+
+@app.get("/process-mails")
+def process_mails():
+    """Process all mails in the mail directory"""
+    try:
+        process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, True)
+        return {"status": "success", "message": "Mails processed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
