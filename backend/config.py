@@ -1,20 +1,23 @@
 import os
-from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Config:
     """Configuration management for the mail analysis and messaging system"""
 
     # OpenAI Configuration
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_API_KEY: str = os.getenv("OPEN_AI", "")
 
     # Twilio Configuration
-    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")
-    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
-    TWILIO_PHONE_NUMBER: str = os.getenv("TWILIO_PHONE_NUMBER", "")
+    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_SID", "")
+    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH", "")
+    TWILIO_PHONE_NUMBER: str = os.getenv("TWILIO_PHONE", "")
 
     # Recipient Configuration
-    RECIPIENT_PHONE: str = os.getenv("RECIPIENT_PHONE", "")
+    RECIPIENT_PHONE: str = os.getenv("RECIPIENT_CONTACT", "")
 
     @classmethod
     def validate_openai_config(cls) -> bool:
