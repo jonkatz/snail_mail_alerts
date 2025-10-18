@@ -8,6 +8,8 @@ import os
 from messaging import send_simple_message
 from config import Config
 from mail_processor import process_multiple_mails
+from document_chunker import process_multiple_pdfs_to_chunks
+from document_search import DocumentSearcher
 
 app = FastAPI(
     title="SMS Messaging API", description="Simple SMS messaging using SlickText API"
@@ -40,6 +42,7 @@ def read_root():
             "/health": "Check system configuration",
             "/process-mails": "Process all mails and send SMS notifications (English)",
             "/process-mails-spanish": "Process all mails and send SMS notifications (Spanish)",
+            "/db-stats": "Get document database statistics",
         },
     }
 
@@ -72,17 +75,27 @@ def ask_ai(request: ChatRequest):
         # Initialize OpenAI client
         client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
+        # Search for relevant document context
+        searcher = DocumentSearcher("db")
+        document_context = searcher.get_context_for_ai(request.question, max_chunks=3)
+
+        # Prepare system message with document context
+        system_message = """You are a helpful assistant that can answer questions about documents.
+        You have access to processed mail and document content. Keep responses concise and under 160 characters when possible for SMS.
+        If the user's question relates to documents in the system, use that information to provide accurate answers.
+        If no relevant documents are found, let the user know that no relevant documents were found. Never be ambiguous."""
+
+        # Prepare messages with document context
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": f"Context: {document_context}\n\nQuestion: {request.question}"}
+        ]
+
         # Create chat completion
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # Using mini for cost efficiency
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant. Keep responses concise and under 160 characters when possible for SMS.",
-                },
-                {"role": "user", "content": request.question},
-            ],
-            max_tokens=150,
+            messages=messages,
+            max_tokens=200,  # Increased slightly for document-based responses
             temperature=0.7,
         )
 
@@ -126,12 +139,35 @@ def health_check():
 
 @app.get("/process-mails")
 def process_mails():
-    """Process all mails in the mail directory (English)"""
+    """Process all mails in the mail directory and chunk documents"""
     try:
-        process_multiple_mails(
-            Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, False, "english"
-        )
-        return {"status": "success", "message": "Mails processed successfully"}
+        # Process mails for analysis and SMS notifications
+        mail_results = process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, True)
+
+        # # Chunk documents and save to db folder
+        # chunked_folders = process_multiple_pdfs_to_chunks(Config.MAIL_DIRECTORY, "db", 500)
+
+        return {
+            "status": "success",
+            "message": "Mails processed and chunked successfully",
+            "mail_analyses": len(mail_results),
+            # "documents_chunked": len(chunked_folders),
+            # "chunked_folders": chunked_folders
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+
+@app.get("/db-stats")
+def get_database_stats():
+    """Get statistics about the document database"""
+    try:
+        searcher = DocumentSearcher("db")
+        stats = searcher.get_database_stats()
+        return {
+            "status": "success",
+            "database_stats": stats
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 

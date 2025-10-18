@@ -1,0 +1,16 @@
+{
+  "document_name": "IRS_Demo_Doc",
+  "total_chunks": 8,
+  "chunk_size": 500,
+  "created_at": null,
+  "chunks": [
+    "chunk_000.txt",
+    "chunk_001.txt",
+    "chunk_002.txt",
+    "chunk_003.txt",
+    "chunk_004.txt",
+    "chunk_005.txt",
+    "chunk_006.txt",
+    "chunk_007.txt"
+  ]
+}
