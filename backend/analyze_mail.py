@@ -22,7 +22,9 @@ class MailAnalysis(BaseModel):
     summary: str
 
 
-def analyze_mail_pdf(pdf_path: str, api_key: Optional[str] = None) -> MailAnalysis:
+def analyze_mail_pdf(
+    pdf_path: str, api_key: Optional[str] = None, language: str = "english"
+) -> MailAnalysis:
     """
     Analyzes a PDF of mail to determine if it's important (bill, official document)
     or not important (junk mail, offers, newsletters, magazines).
@@ -30,6 +32,7 @@ def analyze_mail_pdf(pdf_path: str, api_key: Optional[str] = None) -> MailAnalys
     Args:
         pdf_path: Path to the PDF file to analyze
         api_key: OpenAI API key (if not provided, uses OPENAI_API_KEY env var)
+        language: Language for the analysis output (default: "english", also supports "spanish")
 
     Returns:
         MailAnalysis object with analysis results
@@ -122,6 +125,29 @@ def analyze_mail_pdf(pdf_path: str, api_key: Optional[str] = None) -> MailAnalys
 
     # Create the response with PDF file and function calling
     try:
+        # Set the prompt based on language
+        if language.lower() == "spanish":
+            prompt_text = """Analiza este documento de correo y determina si es importante o no importante.
+
+El correo importante incluye: facturas, recibos, documentos oficiales del gobierno, avisos legales, 
+documentos fiscales, estados de cuenta médicos, estados financieros, avisos urgentes.
+
+El correo no importante incluye: correo basura, ofertas promocionales, boletines informativos, revistas, 
+catálogos, anuncios, solicitudes.
+
+Usa la función is_important para clasificar este documento con todos los detalles relevantes. 
+IMPORTANTE: Proporciona el resumen (summary) en español."""
+        else:
+            prompt_text = """Analyze this mail document and determine if it's important or not important.
+
+Important mail includes: bills, invoices, official government documents, legal notices, 
+tax documents, medical statements, financial statements, urgent notices.
+
+Not important mail includes: junk mail, promotional offers, newsletters, magazines, 
+catalogs, advertisements, solicitations.
+
+Use the is_important function to classify this document with all relevant details."""
+
         input_list = [
             {
                 "role": "user",
@@ -132,15 +158,7 @@ def analyze_mail_pdf(pdf_path: str, api_key: Optional[str] = None) -> MailAnalys
                     },
                     {
                         "type": "input_text",
-                        "text": """Analyze this mail document and determine if it's important or not important.
-
-Important mail includes: bills, invoices, official government documents, legal notices, 
-tax documents, medical statements, financial statements, urgent notices.
-
-Not important mail includes: junk mail, promotional offers, newsletters, magazines, 
-catalogs, advertisements, solicitations.
-
-Use the is_important function to classify this document with all relevant details.""",
+                        "text": prompt_text,
                     },
                 ],
             }

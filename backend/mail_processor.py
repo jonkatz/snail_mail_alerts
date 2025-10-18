@@ -7,7 +7,10 @@ from config import Config
 
 
 def process_mail(
-    pdf_path: str, recipient_phone: Optional[str] = None, send_all: bool = False
+    pdf_path: str,
+    recipient_phone: Optional[str] = None,
+    send_all: bool = False,
+    language: str = "english",
 ) -> MailAnalysis:
     """
     Process a mail PDF: analyze it and send summary if important
@@ -16,6 +19,7 @@ def process_mail(
         pdf_path: Path to the PDF file to analyze
         recipient_phone: Phone number to send to (optional, uses config default)
         send_all: If True, send summary for all mail. If False, only send for important mail
+        language: Language for analysis and messages (default: "english", also supports "spanish")
 
     Returns:
         MailAnalysis: The analysis results
@@ -43,7 +47,7 @@ def process_mail(
 
     # Analyze the mail
     print(f"Analyzing mail: {pdf_path}")
-    analysis = analyze_mail_pdf(pdf_path)
+    analysis = analyze_mail_pdf(pdf_path, language=language)
 
     # Print analysis results
     print("\n" + "=" * 50)
@@ -66,7 +70,7 @@ def process_mail(
 
     if should_send:
         print(f"\nSending {'important ' if analysis.important else ''}mail summary...")
-        success = send_mail_summary(analysis, pdf_path, recipient_phone)
+        success = send_mail_summary(analysis, pdf_path, recipient_phone, language)
         if success:
             print("✅ Message sent successfully!")
         else:
@@ -78,7 +82,10 @@ def process_mail(
 
 
 def process_multiple_mails(
-    pdf_directory: str, recipient_phone: Optional[str] = None, send_all: bool = False
+    pdf_directory: str,
+    recipient_phone: Optional[str] = None,
+    send_all: bool = False,
+    language: str = "english",
 ) -> list[MailAnalysis]:
     """
     Process multiple mail PDFs in a directory
@@ -87,6 +94,7 @@ def process_multiple_mails(
         pdf_directory: Directory containing PDF files
         recipient_phone: Phone number to send to (optional, uses config default)
         send_all: If True, send summary for all mail. If False, only send for important mail
+        language: Language for analysis and messages (default: "english", also supports "spanish")
 
     Returns:
         list[MailAnalysis]: List of analysis results for each PDF
@@ -114,7 +122,7 @@ def process_multiple_mails(
         print(f"{'='*60}")
 
         try:
-            analysis = process_mail(pdf_path, recipient_phone, send_all)
+            analysis = process_mail(pdf_path, recipient_phone, send_all, language)
             results.append(analysis)
 
             if analysis.important:
@@ -125,7 +133,10 @@ def process_multiple_mails(
 
     # Send summary message
     if results:
-        summary_text = f"📬 Processed {len(results)} mail items. {important_count} important items found."
+        if language.lower() == "spanish":
+            summary_text = f"📬 Procesados {len(results)} correos. {important_count} correos importantes encontrados."
+        else:
+            summary_text = f"📬 Processed {len(results)} mail items. {important_count} important items found."
         send_simple_message(summary_text, recipient_phone)
 
     return results
