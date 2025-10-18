@@ -1,0 +1,27 @@
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test_pdfs/
+*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+
