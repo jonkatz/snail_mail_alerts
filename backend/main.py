@@ -135,15 +135,15 @@ def process_mails():
         # Process mails for analysis and SMS notifications
         mail_results = process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, True)
 
-        # Chunk documents and save to db folder
-        chunked_folders = process_multiple_pdfs_to_chunks(Config.MAIL_DIRECTORY, "db", 500)
+        # # Chunk documents and save to db folder
+        # chunked_folders = process_multiple_pdfs_to_chunks(Config.MAIL_DIRECTORY, "db", 500)
 
         return {
             "status": "success",
             "message": "Mails processed and chunked successfully",
             "mail_analyses": len(mail_results),
-            "documents_chunked": len(chunked_folders),
-            "chunked_folders": chunked_folders
+            # "documents_chunked": len(chunked_folders),
+            # "chunked_folders": chunked_folders
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
