@@ -1,0 +1,11 @@
+{
+  "document_name": "Receipt_from_calendly",
+  "total_chunks": 3,
+  "chunk_size": 500,
+  "created_at": null,
+  "chunks": [
+    "chunk_000.txt",
+    "chunk_001.txt",
+    "chunk_002.txt"
+  ]
+}

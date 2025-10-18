@@ -66,7 +66,7 @@ def process_mail(
 
     if should_send:
         print(f"\nSending {'important ' if analysis.important else ''}mail summary...")
-        success = send_mail_summary(analysis, recipient_phone)
+        success = send_mail_summary(analysis, pdf_path, recipient_phone)
         if success:
             print("✅ Message sent successfully!")
         else:
