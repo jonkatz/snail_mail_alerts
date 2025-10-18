@@ -5,7 +5,9 @@ from pydantic import BaseModel
 from messaging import send_simple_message
 from config import Config
 
-app = FastAPI(title="SMS Messaging API", description="Simple SMS messaging using SlickText API")
+app = FastAPI(
+    title="SMS Messaging API", description="Simple SMS messaging using SlickText API"
+)
 
 
 class MessageRequest(BaseModel):
@@ -20,8 +22,8 @@ def read_root():
         "version": "1.0.0",
         "endpoints": {
             "/send-message": "Send simple SMS message",
-            "/health": "Check system configuration"
-        }
+            "/health": "Check system configuration",
+        },
     }
 
 
@@ -29,10 +31,7 @@ def read_root():
 def send_message(request: MessageRequest):
     """Send a simple SMS message via Twilio"""
     try:
-        success = send_simple_message(
-            request.text,
-            request.recipient_phone
-        )
+        success = send_simple_message(request.text, request.recipient_phone)
         if success:
             return {"status": "success", "message": "SMS sent successfully"}
         else:
@@ -50,6 +49,6 @@ def health_check():
         "status": "healthy",
         "configuration": {
             "twilio_configured": Config.validate_twilio_config(),
-            "recipient_configured": Config.validate_recipient_config()
-        }
+            "recipient_configured": Config.validate_recipient_config(),
+        },
     }
