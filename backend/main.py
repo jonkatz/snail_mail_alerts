@@ -30,7 +30,7 @@ def read_root():
         "endpoints": {
             "/send-message": "Send simple SMS message",
             "/ask-ai": "Ask OpenAI a question and get response via SMS",
-            "/health": "Check system configuration"
+            "/health": "Check system configuration",
         },
     }
 
@@ -56,7 +56,9 @@ def ask_ai(request: ChatRequest):
     try:
         # Validate OpenAI configuration
         if not Config.validate_openai_config():
-            raise ValueError("OpenAI configuration is incomplete. Check OPEN_AI API key")
+            raise ValueError(
+                "OpenAI configuration is incomplete. Check OPEN_AI API key"
+            )
 
         # Initialize OpenAI client
         client = OpenAI(api_key=Config.OPENAI_API_KEY)
@@ -67,37 +69,31 @@ def ask_ai(request: ChatRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant. Keep responses concise and under 160 characters when possible for SMS."
+                    "content": "You are a helpful assistant. Keep responses concise and under 160 characters when possible for SMS.",
                 },
-                {
-                    "role": "user",
-                    "content": request.question
-                }
+                {"role": "user", "content": request.question},
             ],
             max_tokens=150,
-            temperature=0.7
+            temperature=0.7,
         )
 
         # Get the AI response
         ai_response = response.choices[0].message.content
 
         # Send the AI response via SMS
-        sms_success = send_simple_message(
-            f"AI: {ai_response}",
-            request.recipient_phone
-        )
+        sms_success = send_simple_message(f"AI: {ai_response}", request.recipient_phone)
 
         if sms_success:
             return {
                 "status": "success",
                 "message": "AI response sent via SMS",
-                "ai_response": ai_response
+                "ai_response": ai_response,
             }
         else:
             return {
                 "status": "partial_success",
                 "message": "AI responded but SMS failed",
-                "ai_response": ai_response
+                "ai_response": ai_response,
             }
 
     except ValueError as e:
@@ -123,7 +119,7 @@ def health_check():
 def process_mails():
     """Process all mails in the mail directory"""
     try:
-        process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, True)
+        process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, False)
         return {"status": "success", "message": "Mails processed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")

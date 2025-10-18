@@ -22,6 +22,9 @@ class Config:
     # Mail Directory Configuration
     MAIL_DIRECTORY: str = os.getenv("MAIL_DIRECTORY", "")
 
+    # Root URL Configuration
+    ROOT_URL: str = os.getenv("ROOT_URL", "")
+
     @classmethod
     def validate_openai_config(cls) -> bool:
         """Check if OpenAI configuration is valid"""
