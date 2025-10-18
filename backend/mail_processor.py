@@ -6,7 +6,9 @@ from messaging import send_mail_summary, send_simple_message
 from config import Config
 
 
-def process_mail(pdf_path: str, recipient_phone: Optional[str] = None, send_all: bool = False) -> MailAnalysis:
+def process_mail(
+    pdf_path: str, recipient_phone: Optional[str] = None, send_all: bool = False
+) -> MailAnalysis:
     """
     Process a mail PDF: analyze it and send summary if important
 
@@ -25,13 +27,19 @@ def process_mail(pdf_path: str, recipient_phone: Optional[str] = None, send_all:
 
     # Validate configurations
     if not Config.validate_openai_config():
-        raise ValueError("OpenAI API key not configured. Set OPENAI_API_KEY environment variable")
+        raise ValueError(
+            "OpenAI API key not configured. Set OPENAI_API_KEY environment variable"
+        )
 
     if not Config.validate_twilio_config():
-        raise ValueError("Twilio configuration incomplete. Check TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER")
+        raise ValueError(
+            "Twilio configuration incomplete. Check TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER"
+        )
 
     if not recipient_phone and not Config.validate_recipient_config():
-        raise ValueError("No recipient phone number configured. Set RECIPIENT_PHONE environment variable or provide recipient_phone parameter")
+        raise ValueError(
+            "No recipient phone number configured. Set RECIPIENT_PHONE environment variable or provide recipient_phone parameter"
+        )
 
     # Analyze the mail
     print(f"Analyzing mail: {pdf_path}")
@@ -41,20 +49,16 @@ def process_mail(pdf_path: str, recipient_phone: Optional[str] = None, send_all:
     print("\n" + "=" * 50)
     print("MAIL ANALYSIS RESULTS")
     print("=" * 50)
+    print(f"PDF Path: {pdf_path}")
+    print(f"Sender: {analysis.sender}")
     print(f"Important: {'✓ YES' if analysis.important else '✗ NO'}")
     print(f"Action Required: {'✓ YES' if analysis.action_required else '✗ NO'}")
-    print(f"Sender: {analysis.sender}")
     print(f"Priority: {analysis.priority.upper()}")
+    print(f"Due Date: {analysis.due_date if analysis.due_date else 'N/A'}")
+    print(f"Overdue: {'⚠️  YES' if analysis.is_overdue else 'No'}")
+    print(f"Amount: {analysis.amount if analysis.amount else 'N/A'}")
+    print(f"Summary: {analysis.summary}")
 
-    if analysis.due_date:
-        print(f"Due Date: {analysis.due_date}")
-        if analysis.is_overdue:
-            print("Status: ⚠️  OVERDUE")
-
-    if analysis.amount:
-        print(f"Amount: {analysis.amount}")
-
-    print(f"\nSummary: {analysis.summary}")
     print("=" * 50)
 
     # Decide whether to send message
@@ -73,7 +77,9 @@ def process_mail(pdf_path: str, recipient_phone: Optional[str] = None, send_all:
     return analysis
 
 
-def process_multiple_mails(pdf_directory: str, recipient_phone: Optional[str] = None, send_all: bool = False) -> list[MailAnalysis]:
+def process_multiple_mails(
+    pdf_directory: str, recipient_phone: Optional[str] = None, send_all: bool = False
+) -> list[MailAnalysis]:
     """
     Process multiple mail PDFs in a directory
 
@@ -90,7 +96,7 @@ def process_multiple_mails(pdf_directory: str, recipient_phone: Optional[str] = 
         raise ValueError(f"Directory not found: {pdf_directory}")
 
     # Find all PDF files
-    pdf_files = [f for f in os.listdir(pdf_directory) if f.lower().endswith('.pdf')]
+    pdf_files = [f for f in os.listdir(pdf_directory) if f.lower().endswith(".pdf")]
 
     if not pdf_files:
         print(f"No PDF files found in {pdf_directory}")
@@ -130,8 +136,12 @@ def main():
 
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  Single file: python mail_processor.py <pdf_path> [recipient_phone] [--send-all]")
-        print("  Directory:   python mail_processor.py --dir <directory_path> [recipient_phone] [--send-all]")
+        print(
+            "  Single file: python mail_processor.py <pdf_path> [recipient_phone] [--send-all]"
+        )
+        print(
+            "  Directory:   python mail_processor.py --dir <directory_path> [recipient_phone] [--send-all]"
+        )
         print("")
         print("Options:")
         print("  --send-all    Send summaries for all mail (not just important)")

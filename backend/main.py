@@ -5,8 +5,11 @@ from openai import OpenAI
 
 from messaging import send_simple_message
 from config import Config
+from mail_processor import process_multiple_mails
 
-app = FastAPI(title="SMS Messaging API", description="Simple SMS messaging using SlickText API")
+app = FastAPI(
+    title="SMS Messaging API", description="Simple SMS messaging using SlickText API"
+)
 
 
 class MessageRequest(BaseModel):
@@ -28,7 +31,7 @@ def read_root():
             "/send-message": "Send simple SMS message",
             "/ask-ai": "Ask OpenAI a question and get response via SMS",
             "/health": "Check system configuration"
-        }
+        },
     }
 
 
@@ -36,10 +39,7 @@ def read_root():
 def send_message(request: MessageRequest):
     """Send a simple SMS message via Twilio"""
     try:
-        success = send_simple_message(
-            request.text,
-            request.recipient_phone
-        )
+        success = send_simple_message(request.text, request.recipient_phone)
         if success:
             return {"status": "success", "message": "SMS sent successfully"}
         else:
@@ -114,6 +114,16 @@ def health_check():
         "configuration": {
             "openai_configured": Config.validate_openai_config(),
             "twilio_configured": Config.validate_twilio_config(),
-            "recipient_configured": Config.validate_recipient_config()
-        }
+            "recipient_configured": Config.validate_recipient_config(),
+        },
     }
+
+
+@app.get("/process-mails")
+def process_mails():
+    """Process all mails in the mail directory"""
+    try:
+        process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, True)
+        return {"status": "success", "message": "Mails processed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")

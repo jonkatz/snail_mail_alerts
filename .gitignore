@@ -19,7 +19,6 @@ __pycache__/
 
 # Test files
 test_pdfs/
-*.pdf
 
 # OS
 .DS_Store
