@@ -1,0 +1,13 @@
+NOTICE  
+Date:  October 1, 2025  
+To: Jordan A. Sample  
+ Tax ID (masked):  XXX -XX-6789  
+ Address:  1234 Demo Ave., Apt. 210, Boise, ID 83702  
+From:  Internal Revenue Service — DEMONSTRATION SAMPLE COPY  
+ Subject:  Notice of Account Review — Action Required (DEMO)  
+ 
+Dear Jordan A. Sample,  
+IMPORTANT  
+We are conducting a routine review of the taxpayer account associated with the Tax ID 
+shown above. During this sample review we identified discrepancies for the tax year(s) 
+2022  and 2023

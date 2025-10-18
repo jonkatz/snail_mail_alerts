@@ -1,0 +1,10 @@
+0 . 
+• Unapplied payment:  A payment of $1,200.00  submitted on 06/14/2023 was 
+applied to a different tax period in our system; documentation of that payment 
+(bank remittance or payment confirmation) is requested.  
+• Missing documentation:  Copies of Form W -2 for employer “DemoTech Solutions” 
+for tax year 2023 and Form 1099 -NEC from “Acme Contracting LLC” for tax year 
+2022 are not on file.  
+Detail  
+• Third -party record: Acme Contracting LLC — 1099 -NEC — $28,450.00 (reported to 
+IRS on
