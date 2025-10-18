@@ -1,7 +1,9 @@
 from typing import Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from openai import OpenAI
+import os
 
 from messaging import send_simple_message
 from config import Config
@@ -10,6 +12,11 @@ from mail_processor import process_multiple_mails
 app = FastAPI(
     title="SMS Messaging API", description="Simple SMS messaging using SlickText API"
 )
+
+# Mount static files directory for serving PDFs
+# This makes PDFs accessible at /test_mails/<filename>.pdf
+test_mails_path = os.path.join(os.path.dirname(__file__), "test_mails")
+app.mount("/test_mails", StaticFiles(directory=test_mails_path), name="test_mails")
 
 
 class MessageRequest(BaseModel):
@@ -31,6 +38,8 @@ def read_root():
             "/send-message": "Send simple SMS message",
             "/ask-ai": "Ask OpenAI a question and get response via SMS",
             "/health": "Check system configuration",
+            "/process-mails": "Process all mails and send SMS notifications (English)",
+            "/process-mails-spanish": "Process all mails and send SMS notifications (Spanish)",
         },
     }
 
@@ -117,9 +126,23 @@ def health_check():
 
 @app.get("/process-mails")
 def process_mails():
-    """Process all mails in the mail directory"""
+    """Process all mails in the mail directory (English)"""
     try:
-        process_multiple_mails(Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, False)
+        process_multiple_mails(
+            Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, False, "english"
+        )
         return {"status": "success", "message": "Mails processed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+
+@app.get("/process-mails-spanish")
+def process_mails_spanish():
+    """Process all mails in the mail directory (Spanish - análisis y mensajes en español)"""
+    try:
+        process_multiple_mails(
+            Config.MAIL_DIRECTORY, Config.RECIPIENT_PHONE, False, "spanish"
+        )
+        return {"status": "success", "message": "Correos procesados exitosamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")

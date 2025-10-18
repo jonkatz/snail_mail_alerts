@@ -1,46 +1,82 @@
 from typing import Optional
+import os
 from twilio.rest import Client
 from analyze_mail import MailAnalysis
 from config import Config
 
 
-def format_mail_summary(analysis: MailAnalysis, path: str) -> str:
+def format_mail_summary(
+    analysis: MailAnalysis, path: str, language: str = "english"
+) -> str:
     """Format mail analysis into a concise text message"""
+
+    # Extract just the filename from the path for the URL
+    filename = os.path.basename(path)
 
     # Start with priority indicator
     priority_emoji = {"high": "🚨", "medium": "⚠️", "low": "ℹ️"}
 
     emoji = priority_emoji.get(analysis.priority, "📧")
 
-    # Build message
-    message_parts = [
-        f"{emoji} Mail from {analysis.sender}",
-        f"Priority: {analysis.priority.upper()}",
-    ]
+    # Build message based on language
+    if language.lower() == "spanish":
+        # Spanish version
+        priority_text = {"high": "ALTA", "medium": "MEDIA", "low": "BAJA"}
+        message_parts = [
+            f"{emoji} Correo de {analysis.sender}",
+            f"Prioridad: {priority_text.get(analysis.priority, analysis.priority.upper())}",
+        ]
 
-    if analysis.action_required:
-        message_parts.append("✅ ACTION REQUIRED")
+        if analysis.action_required:
+            message_parts.append("✅ ACCIÓN REQUERIDA")
 
-    if analysis.amount:
-        message_parts.append(f"💰 Amount: {analysis.amount}")
+        if analysis.amount:
+            message_parts.append(f"💰 Monto: {analysis.amount}")
 
-    if analysis.due_date:
-        status = "⏰ OVERDUE" if analysis.is_overdue else "📅"
-        message_parts.append(f"{status} Due: {analysis.due_date}")
+        if analysis.due_date:
+            status = "⏰ VENCIDO" if analysis.is_overdue else "📅"
+            message_parts.append(f"{status} Vence: {analysis.due_date}")
 
-    # Add summary
-    message_parts.append(f"\n📝 {analysis.summary}")
+        # Add summary
+        message_parts.append(f"\n📝 {analysis.summary}")
 
-    message_parts.append("")
-    message_parts.append("Click to view the mail:")
-    message_parts.append(f"** {Config.ROOT_URL}/test_mails/{path} **")
-    message_parts.append("---")
+        message_parts.append("")
+        message_parts.append("Haz clic para ver el correo:")
+        message_parts.append(f"** {Config.ROOT_URL}/test_mails/{filename} **")
+        message_parts.append("---")
+    else:
+        # English version (original)
+        message_parts = [
+            f"{emoji} Mail from {analysis.sender}",
+            f"Priority: {analysis.priority.upper()}",
+        ]
+
+        if analysis.action_required:
+            message_parts.append("✅ ACTION REQUIRED")
+
+        if analysis.amount:
+            message_parts.append(f"💰 Amount: {analysis.amount}")
+
+        if analysis.due_date:
+            status = "⏰ OVERDUE" if analysis.is_overdue else "📅"
+            message_parts.append(f"{status} Due: {analysis.due_date}")
+
+        # Add summary
+        message_parts.append(f"\n📝 {analysis.summary}")
+
+        message_parts.append("")
+        message_parts.append("Click to view the mail:")
+        message_parts.append(f"** {Config.ROOT_URL}/test_mails/{filename} **")
+        message_parts.append("---")
 
     return "\n".join(message_parts)
 
 
 def send_mail_summary(
-    analysis: MailAnalysis, path: str, recipient_phone: Optional[str] = None
+    analysis: MailAnalysis,
+    path: str,
+    recipient_phone: Optional[str] = None,
+    language: str = "english",
 ) -> bool:
     """
     Send mail analysis summary via Twilio SMS
@@ -48,6 +84,7 @@ def send_mail_summary(
     Args:
         analysis: MailAnalysis object with mail details
         recipient_phone: Phone number to send to (optional, uses config default)
+        language: Language for the message (default: "english", also supports "spanish")
 
     Returns:
         bool: True if message sent successfully, False otherwise
@@ -69,7 +106,7 @@ def send_mail_summary(
         client = Client(Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN)
 
         # Format the message
-        message_body = format_mail_summary(analysis, path)
+        message_body = format_mail_summary(analysis, path, language)
 
         # Send SMS
         message = client.messages.create(
